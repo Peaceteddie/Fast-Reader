@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speedreader settings</title>
+  </head>
+  <body style="display: flex; flex-direction: column; width: 400px">
+    <h1>Speedreader settings</h1>
+    <label id="speedText" for="speed"></label>
+    <input
+      type="range"
+      name="speed"
+      id="speed"
+      step="10"
+      min="10"
+      max="500"
+      value="250"
+    />
+
+    <label id="interspeedText" for="interspeed"></label>
+    <input
+      type="range"
+      name="interspeed"
+      id="interspeed"
+      value="50"
+      max="100"
+      min="0"
+      step="10"
+    />
+
+    <label id="semistopText" for="semistop"></label>
+    <input
+      type="range"
+      name="semistop"
+      id="semistop"
+      min="0"
+      max="500"
+      step="10"
+      value="200"
+    />
+
+    <label id="fullstopText" for="fullstop"></label>
+    <input
+      type="range"
+      name="fullstop"
+      id="fullstop"
+      min="0"
+      max="500"
+      step="10"
+      value="200"
+    />
+
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

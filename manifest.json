@@ -1,0 +1,26 @@
+{
+	"manifest_version": 3,
+	"name": "Fast Reader",
+	"description": "Rapidly display each word of a selected text for hyperfast reading.",
+	"version": "1.0",
+	"icons": {
+		"16": "images/icon.png",
+		"32": "images/icon.png",
+		"48": "images/icon.png",
+		"128": "images/icon.png"
+	},
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
+	},
+	"action": {
+		"default_popup": "popup.html",
+		"default_icon": {
+			"16": "images/icon.png",
+			"32": "images/icon.png",
+			"48": "images/icon.png",
+			"128": "images/icon.png"
+		}
+	},
+	"permissions": ["activeTab", "contextMenus", "scripting", "storage"]
+}
