@@ -42,6 +42,7 @@ async function Speedread(selection) {
 
   var abortSignal;
   var words = selection.split(" ");
+  words = text.replace(/\n/g, " \n ").split(" ");
 
   await chrome.storage.sync.get(
     { speed: 250, interspeed: 50, semistop: 200, fullstop: 200 },
@@ -57,7 +58,10 @@ async function Speedread(selection) {
           var word = words.shift();
           readerBackground.innerText = word;
 
-          if (endsWith(word, [".", "?", "!", "]"])) {
+          if (
+            endsWith(word, [".", "?", "!", "]"]) ||
+            endsWithNewline(word, words)
+          ) {
             if (data.fullstop > 0)
               await new Promise((resolve) =>
                 setTimeout(resolve, data.fullstop)
@@ -81,15 +85,28 @@ async function Speedread(selection) {
         }
         readerBackground.remove();
       }, 500);
-
-      function endsWith(word, chars) {
-        for (var i = 0; i < chars.length; i++) {
-          if (word.endsWith(chars[i])) {
-            return true;
-          }
-        }
-        return false;
-      }
     }
   );
 }
+
+function endsWith(word, chars) {
+  for (var i = 0; i < chars.length; i++) {
+    if (word.endsWith(chars[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+function endsWithNewline(word, words) {
+  const wordIndex = words.indexOf(word);
+  // If this is not the last word in the words array, check the next word
+  if (wordIndex < words.length - 1) {
+    return words[wordIndex + 1] === "";
+  }
+  return false;
+}
+
+module.exports = {
+  endsWith,
+  endsWithNewline,
+};
