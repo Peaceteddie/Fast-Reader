@@ -9,7 +9,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       function: Speedread,
-      args: [info.selectionText],
+      args: [info.selectedText],
     });
   }
 });
@@ -41,8 +41,7 @@ async function Speedread(selection) {
   document.body.appendChild(readerBackground);
 
   var abortSignal;
-  var words = selection.split(" ");
-  words = text.replace(/\n/g, " \n ").split(" ");
+  var words = selection.split(/\s+/);
 
   await chrome.storage.sync.get(
     { speed: 250, interspeed: 50, semistop: 200, fullstop: 200 },
@@ -58,15 +57,12 @@ async function Speedread(selection) {
           var word = words.shift();
           readerBackground.innerText = word;
 
-          if (
-            endsWith(word, [".", "?", "!", "]"]) ||
-            endsWithNewline(word, words)
-          ) {
+          if (word.endsWith(".") || word.endsWith("!") || word.endsWith("?")) {
             if (data.fullstop > 0)
               await new Promise((resolve) =>
                 setTimeout(resolve, data.fullstop)
               );
-          } else if (endsWith(word, [",", ";"])) {
+          } else if (word.endsWith(",") || word.endsWith(";")) {
             if (data.semistop > 0)
               await new Promise((resolve) =>
                 setTimeout(resolve, data.semistop)
@@ -88,25 +84,3 @@ async function Speedread(selection) {
     }
   );
 }
-
-function endsWith(word, chars) {
-  for (var i = 0; i < chars.length; i++) {
-    if (word.endsWith(chars[i])) {
-      return true;
-    }
-  }
-  return false;
-}
-function endsWithNewline(word, words) {
-  const wordIndex = words.indexOf(word);
-  // If this is not the last word in the words array, check the next word
-  if (wordIndex < words.length - 1) {
-    return words[wordIndex + 1] === "";
-  }
-  return false;
-}
-
-module.exports = {
-  endsWith,
-  endsWithNewline,
-};
