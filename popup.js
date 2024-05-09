@@ -1,3 +1,14 @@
+chrome.storage.sync.get("speed", (data) => {
+  if (data.speed === undefined) {
+    chrome.storage.sync.set({
+      speed: 250,
+      interspeed: 0,
+      semistop: 300,
+      fullstop: 400,
+    });
+  }
+});
+
 const GetSpeedText = (value) => "Word delay: " + value + "ms";
 
 const GetInterspeedText = (value) => "Delay between words: " + value + "ms";
@@ -38,28 +49,25 @@ function updateFullstop(value) {
 /////////////////////////////////////////////////////////////////////////////
 
 document.addEventListener("DOMContentLoaded", () => {
-  chrome.storage.sync.get(
-    { speed: 250, interspeed: 50, semistop: 200, fullstop: 200 },
-    (data) => {
-      document.getElementById("speed").value = data.speed;
-      document.getElementById("speedText").innerText = GetSpeedText(data.speed);
+  chrome.storage.sync.get((data) => {
+    document.getElementById("speed").value = data.speed;
+    document.getElementById("speedText").innerText = GetSpeedText(data.speed);
 
-      document.getElementById("interspeed").value = data.interspeed;
-      document.getElementById("interspeedText").innerText = GetInterspeedText(
-        data.interspeed
-      );
+    document.getElementById("interspeed").value = data.interspeed;
+    document.getElementById("interspeedText").innerText = GetInterspeedText(
+      data.interspeed
+    );
 
-      document.getElementById("semistop").value = data.semistop;
-      document.getElementById("semistopText").innerText = GetSemistopText(
-        data.semistop
-      );
+    document.getElementById("semistop").value = data.semistop;
+    document.getElementById("semistopText").innerText = GetSemistopText(
+      data.semistop
+    );
 
-      document.getElementById("fullstop").value = data.fullstop;
-      document.getElementById("fullstopText").innerText = GetFullstopText(
-        data.fullstop
-      );
-    }
-  );
+    document.getElementById("fullstop").value = data.fullstop;
+    document.getElementById("fullstopText").innerText = GetFullstopText(
+      data.fullstop
+    );
+  });
 });
 
 /////////////////////////////////////////////////////////////////////////////

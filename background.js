@@ -9,78 +9,75 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       function: Speedread,
-      args: [info.selectedText],
+      args: [info.selectionText],
     });
   }
 });
 
 async function Speedread(selection) {
-  var readerBackground = document.querySelector("#reader");
-  var isReading = readerBackground !== null;
+  function createReaderBackground() {
+    const readerBackground = document.createElement("div");
+    readerBackground.style.placeContent = "center";
+    readerBackground.style.placeItems = "center";
+    readerBackground.style.background = "#000c";
+    readerBackground.style.position = "fixed";
+    readerBackground.style.fontSize = "6rem";
+    readerBackground.style.display = "flex";
+    readerBackground.style.height = "100%";
+    readerBackground.style.color = "#fff";
+    readerBackground.style.width = "100%";
+    readerBackground.style.inset = "0";
+    readerBackground.style.zIndex = "1000";
+    readerBackground.id = "reader";
+    return readerBackground;
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  let readerBackground = document.querySelector("#reader");
+  const isReading = readerBackground !== null;
+  console.log("Speedread: " + selection);
 
   if (isReading) return;
 
-  readerBackground = document.createElement("div");
-  readerBackground.style.placeContent = "center";
-  readerBackground.style.placeItems = "center";
-  readerBackground.style.background = "#000c";
-  readerBackground.style.position = "fixed";
-  readerBackground.style.fontSize = "6rem";
-  readerBackground.style.display = "flex";
-  readerBackground.style.height = "100%";
-  readerBackground.style.color = "#fff";
-  readerBackground.style.width = "100%";
-  readerBackground.style.inset = "0";
-  readerBackground.style.zIndex = "1000";
-  readerBackground.id = "reader";
+  readerBackground = createReaderBackground();
 
+  let abortSignal = false;
   readerBackground.addEventListener("click", () => {
     abortSignal = true;
   });
 
   document.body.appendChild(readerBackground);
 
-  var abortSignal;
-  var words = selection.split(/\s+/);
+  const words = selection.split(/\s+/);
 
-  await chrome.storage.sync.get(
-    { speed: 250, interspeed: 50, semistop: 200, fullstop: 200 },
-    async function (data) {
-      readerBackground.innerText = words.shift();
-
-      setTimeout(async () => {
-        while (words.length > 0) {
-          if (abortSignal) {
-            return readerBackground.remove();
-          }
-
-          var word = words.shift();
-          readerBackground.innerText = word;
-
-          if (word.endsWith(".") || word.endsWith("!") || word.endsWith("?")) {
-            if (data.fullstop > 0)
-              await new Promise((resolve) =>
-                setTimeout(resolve, data.fullstop)
-              );
-          } else if (word.endsWith(",") || word.endsWith(";")) {
-            if (data.semistop > 0)
-              await new Promise((resolve) =>
-                setTimeout(resolve, data.semistop)
-              );
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, data.speed));
-
-          word = "";
-          readerBackground.innerText = word;
-
-          if (data.interspeed > 0)
-            await new Promise((resolve) =>
-              setTimeout(resolve, data.interspeed)
-            );
-        }
+  await chrome.storage.sync.get(async function (data) {
+    for (let word of words) {
+      if (abortSignal) {
         readerBackground.remove();
-      }, 500);
+        return;
+      }
+
+      readerBackground.innerText = word;
+
+      if (word.endsWith(".") || word.endsWith("!") || word.endsWith("?")) {
+        if (data.fullstop > 0) await wait(data.fullstop);
+      } else if (
+        word.endsWith(",") ||
+        word.endsWith(";") ||
+        word.endsWith(":")
+      ) {
+        if (data.semistop > 0) await wait(data.semistop);
+      }
+
+      await wait(data.speed);
+
+      readerBackground.innerText = "";
+
+      if (data.interspeed > 0) await wait(data.interspeed);
     }
-  );
+    readerBackground.remove();
+  });
 }
